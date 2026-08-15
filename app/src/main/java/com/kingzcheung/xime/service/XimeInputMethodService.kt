@@ -811,11 +811,9 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
                 val rawDp = if (activeBottomPx > 0) {
                     with(density) { activeBottomPx.toDp().value.toInt() }
                 } else 0
-                // 保证底部最小留白（替换原来键盘内部 10dp 的作用）。
-                // 手势导航下 navigationBars/systemBars 可能全为 0，此时也必须兜底，
-                // 否则键盘背景画不到屏幕底部，手势条区域会露出白色窗口背景。
-                val minBottomDp = 26
-                val activeBottomDp = if (rawDp < minBottomDp) minBottomDp else rawDp
+                // 系统未上报安全区时让键盘直接贴底；不再强制添加 26dp 空白。
+                // 厂商异常上报则限制到标准导航栏高度，避免内容被整体上推。
+                val activeBottomDp = normalizeBottomInsetDp(rawDp)
                 val navBarDp = activeBottomDp.dp
                 val hasNavBar = navBarDp > 0.dp
 
@@ -1407,7 +1405,7 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
                     // 非浮动模式：参考成熟输入法 FULL 方案的背景/高度布局。
                     // 1) edge-to-edge：窗口绘制到系统导航栏后面，键盘背景（渐变/图片）可延伸到底部；
                     // 2) 窗口背景透明：键盘内容由 Compose 绘制，键盘上方露出应用内容而不是白色/主题色块；
-                    // 3) 导航栏透明 + 关闭强制对比度：底部导航栏区域由键盘背景覆盖，不会露出系统白色。
+                    // 3) 导航栏使用当前主题的键盘底色，厂商不允许 IME 绘制到手势区时也不会露出宿主应用。
                     androidx.core.view.WindowCompat.setDecorFitsSystemWindows(win, false)
                     win.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
                     win.setDimAmount(0f)
@@ -1415,7 +1413,7 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
                         win.isNavigationBarContrastEnforced = false
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        win.setNavigationBarColor(android.graphics.Color.TRANSPARENT)
+                        win.setNavigationBarColor(argb)
                     }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

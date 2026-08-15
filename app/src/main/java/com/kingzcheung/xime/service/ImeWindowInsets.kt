@@ -8,6 +8,15 @@ import android.view.WindowInsets
 import kotlin.math.roundToInt
 
 private const val INSETS_TAG = "ImeWindowInsets"
+private const val MAX_BOTTOM_INSET_DP = 48
+
+/**
+ * 只使用系统真实上报的底部安全区，不为手势导航虚构额外留白。
+ * 部分厂商会把底部工具条整体误报为 systemGestures，限制到标准导航栏高度以内，
+ * 避免键盘内容被整块向上推离屏幕底部。
+ */
+internal fun normalizeBottomInsetDp(reportedDp: Int): Int =
+    reportedDp.coerceIn(0, MAX_BOTTOM_INSET_DP)
 
 /** 获取导航栏高度（dp）。 */
 internal fun tryGetNavBarHeightDp(context: Context, imeWindow: Window?): Int {

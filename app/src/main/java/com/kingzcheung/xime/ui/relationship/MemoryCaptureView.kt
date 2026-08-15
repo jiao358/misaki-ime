@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -71,7 +73,9 @@ fun MemoryCaptureView(
         modifier = modifier
             .fillMaxSize()
             .background(backgroundColor)
-            .padding(horizontal = 12.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -88,8 +92,28 @@ fun MemoryCaptureView(
                     fontSize = 11.sp,
                 )
             }
-            if (currentPerson == null) {
-                Button(onClick = onChoosePerson) { Text("选择") }
+            Button(
+                enabled = currentPerson == null || (content.isNotBlank() && !isAnalyzing),
+                onClick = {
+                    if (currentPerson == null) {
+                        onChoosePerson()
+                    } else {
+                        val person = currentPerson ?: return@Button
+                        isAnalyzing = true
+                        scope.launch {
+                            val result = RelationshipAiClient.instance.extractMemories(content, person.id)
+                            candidates = result.candidates
+                            isDegraded = result.degraded
+                            isAnalyzing = false
+                        }
+                    }
+                },
+            ) {
+                if (isAnalyzing) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                } else {
+                    Text(if (currentPerson == null) "选择" else "AI 提取")
+                }
             }
         }
 
@@ -97,34 +121,11 @@ fun MemoryCaptureView(
             value = content,
             onValueChange = { content = it.take(MemoryRepository.MAX_MEMORY_LENGTH) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("待确认的记忆") },
+            label = { Text("待确认的记忆 · ${content.length}/${MemoryRepository.MAX_MEMORY_LENGTH}") },
             placeholder = { Text("先复制对方消息，或在这里输入一条短记忆") },
-            supportingText = { Text("${content.length}/${MemoryRepository.MAX_MEMORY_LENGTH}") },
-            minLines = 2,
-            maxLines = 3,
+            minLines = 1,
+            maxLines = 2,
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Button(
-                enabled = currentPerson != null && content.isNotBlank() && !isAnalyzing,
-                onClick = {
-                    val person = currentPerson ?: return@Button
-                    isAnalyzing = true
-                    scope.launch {
-                        val result = RelationshipAiClient.instance.extractMemories(content, person.id)
-                        candidates = result.candidates
-                        isDegraded = result.degraded
-                        isAnalyzing = false
-                    }
-                },
-            ) {
-                if (isAnalyzing) CircularProgressIndicator(strokeWidth = 2.dp)
-                else Text("提取记忆候选")
-            }
-        }
 
         if (isDegraded) {
             Text("在线提取不可用，已生成本地候选，请务必确认。", color = accentColor, fontSize = 11.sp)
@@ -152,44 +153,59 @@ fun MemoryCaptureView(
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            Text("分类", color = textColor.copy(alpha = 0.65f), fontSize = 10.sp)
             MemoryCategory.entries.forEach { item ->
                 FilterChip(
+                    modifier = Modifier.weight(1f),
                     selected = category == item,
                     onClick = { category = item },
-                    label = { Text(item.label) },
+                    label = {
+                        Text(
+                            when (item) {
+                                MemoryCategory.IMPORTANT_EVENT -> "事件"
+                                MemoryCategory.CURRENT_CONCERN -> "关注"
+                                MemoryCategory.BOUNDARY -> "边界"
+                                MemoryCategory.PREFERENCE -> "偏好"
+                            },
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Clip,
+                        )
+                    },
                 )
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("性质", color = textColor.copy(alpha = 0.65f), fontSize = 10.sp)
             MemoryKind.entries.forEach { item ->
                 FilterChip(
                     selected = kind == item,
                     onClick = { kind = item },
-                    label = { Text(item.label) },
+                    label = { Text(if (item == MemoryKind.FACT) "事实" else "推测", fontSize = 10.sp) },
                 )
             }
-        }
-
-        Button(
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = 8.dp),
-            enabled = currentPerson != null && content.isNotBlank(),
-            onClick = {
-                val person = currentPerson ?: return@Button
-                scope.launch {
-                    repository.save(person.id, content, category, kind)
-                    onSaved()
-                }
-            },
-        ) {
-            Text("确认保存")
+            Button(
+                modifier = Modifier.weight(1f),
+                enabled = currentPerson != null && content.isNotBlank(),
+                onClick = {
+                    val person = currentPerson ?: return@Button
+                    scope.launch {
+                        repository.save(person.id, content, category, kind)
+                        onSaved()
+                    }
+                },
+            ) {
+                Text("确认保存")
+            }
         }
     }
 }
