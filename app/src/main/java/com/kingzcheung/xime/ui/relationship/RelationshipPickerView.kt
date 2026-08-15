@@ -68,7 +68,7 @@ fun RelationshipPickerView(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = textColor)
-                Text("请先在曦码设置中创建关系对象", color = textColor, fontSize = 14.sp)
+                Text("请先在 Misaki 设置中创建关系对象", color = textColor, fontSize = 14.sp)
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {

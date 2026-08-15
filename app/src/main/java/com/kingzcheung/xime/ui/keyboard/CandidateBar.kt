@@ -351,7 +351,7 @@ fun CandidateBar(
                             ) {
                                 Icon(
                                     painter = painterResource(id = if (visuals.isDarkTheme) R.drawable.logo_dark else R.drawable.logo),
-                                    contentDescription = "曦码 Logo",
+                                    contentDescription = "Misaki Logo",
                                     tint = Color.Unspecified,
                                     modifier = Modifier.size(20.dp)
                                 )

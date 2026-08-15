@@ -75,7 +75,12 @@ object AppInfo {
     
     val dependencies = listOf(
         LicenseItem(
-            name = "曦码",
+            name = "Misaki 输入法",
+            license = "GPL-3.0",
+            url = "https://github.com/jiao358/misaki-ime"
+        ),
+        LicenseItem(
+            name = "Xime 上游项目",
             license = "GPL-3.0",
             url = "https://github.com/ximeiorg/Xime"
         ),
@@ -182,7 +187,7 @@ fun AboutContent(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "曦码（Xime）",
+                            text = "Misaki 输入法",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -214,7 +219,7 @@ fun AboutContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { uriHandler.openUri("https://github.com/ximeiorg/Xime/releases") },
+                                .clickable { uriHandler.openUri("https://github.com/jiao358/misaki-ime/releases") },
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -248,7 +253,7 @@ fun AboutContent(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "作者",
+                            text = "Xime 上游项目作者",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -294,7 +299,7 @@ fun AboutContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            uriHandler.openUri("https://github.com/ximeiorg/Xime")
+                            uriHandler.openUri("https://github.com/jiao358/misaki-ime")
                         },
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
@@ -317,7 +322,7 @@ fun AboutContent(
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "github.com/ximeiorg/Xime",
+                                text = "github.com/jiao358/misaki-ime",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -517,7 +522,7 @@ fun PrivacyPolicyContent(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "曦码隐私策略",
+                            text = "Misaki 隐私策略",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -525,22 +530,22 @@ fun PrivacyPolicyContent(
                         
                         PrivacySection(
                             title = "数据收集",
-                            content = "曦码不收集任何个人身份信息。您的输入内容仅用于提供输入法功能，不会被上传到服务器或分享给第三方。"
+                            content = "Misaki 不主动读取通讯录或全量聊天记录。只有在您主动点击“记一下”或“妙回”时，才会处理当前剪贴板文本。"
                         )
                         
                         PrivacySection(
                             title = "本地存储",
-                            content = "曦码将用户设置、用户词库和剪贴板历史存储在您的设备本地，不会上传到云端。您可以随时清除这些数据。"
+                            content = "Misaki 将用户设置、用户词库、剪贴板历史和关系记忆保存在设备本地；关系记忆使用 Android Keystore 加密，并支持导出和彻底删除。"
                         )
                         
                         PrivacySection(
                             title = "网络权限",
-                            content = "曦码需要网络权限用于下载联想模型。下载完成后，模型将在本地运行，您的输入内容不会被上传。"
+                            content = "Misaki 使用网络权限下载联想模型，并在您主动使用关系 AI 时调用配置的后端服务。模型 API Key 只保存在服务端。"
                         )
                         
                         PrivacySection(
                             title = "输入内容",
-                            content = "您的所有输入内容仅保存在本地设备上。曦码使用开源的 Rime 输入引擎，所有处理均在本地完成。"
+                            content = "Rime 日常输入在本地处理。使用“记一下/妙回”时，只发送当前文本、匿名对象 ID 和最多数条相关记忆，不发送真实姓名或完整历史聊天。"
                         )
                         
                         PrivacySection(
@@ -550,12 +555,12 @@ fun PrivacyPolicyContent(
                         
                         PrivacySection(
                             title = "开源",
-                            content = "曦码是开源软件，源代码公开可审计。您可以在 GitHub 上查看完整源代码。"
+                            content = "Misaki 是基于 GPL-3.0 开源项目 Xime 修改的开源软件，源代码和上游归属均可在 GitHub 查看。"
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "更新日期：2026年4月",
+                            text = "更新日期：2026年8月",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
