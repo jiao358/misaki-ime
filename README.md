@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/logo.jpg" alt="Xime Logo" width="600">
+  <img src="docs/logo.jpg" alt="Misaki Logo" width="600">
 </p>
 
-<h1 align="center">Xime - Wubi / Pinyin Input Method for Android</h1>
+<h1 align="center">Misaki - Wubi / Pinyin Input Method and Relationship Assistant for Android</h1>
 
 <p align="center">
   <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a>
@@ -79,17 +79,17 @@ Choose the APK matching your device architecture:
 
 ### From Releases
 
-1. Download the latest APK from [Releases](https://github.com/ximeiorg/Xime/releases)
+1. Download the latest APK from [Releases](https://github.com/jiao358/misaki-ime/releases)
 2. Install the application
-3. Enable Xime in system input method settings
-4. Set Xime as the current input method
+3. Enable Misaki in system input method settings
+4. Set Misaki as the current input method
 
 ### Build from Source
 
 1. Clone the project and build the APK
 2. Install the application
-3. Enable Xime in system input method settings
-4. Set Xime as the current input method
+3. Enable Misaki in system input method settings
+4. Set Misaki as the current input method
 
 ## Documentation
 
@@ -99,7 +99,7 @@ For detailed documentation, visit [https://ime.ximei.me](https://ime.ximei.me).
 
 ```bash
 # Clone with submodules
-git clone --recursive https://github.com/ximeiorg/Xime.git
+git clone --recursive https://github.com/jiao358/misaki-ime.git
 
 # Or initialize submodules in an existing clone
 git submodule update --init --recursive

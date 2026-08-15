@@ -146,7 +146,7 @@ android {
 }
 
 android.applicationVariants.all {
-    val appName = "Xime"
+    val appName = "Misaki"
     outputs.all {
         val abi = filters.find { it.filterType.toString() == "ABI" }?.identifier ?: "universal"
         (this as BaseVariantOutputImpl).outputFileName = "$appName-$versionName-$abi.apk"

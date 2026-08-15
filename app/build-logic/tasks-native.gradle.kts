@@ -42,6 +42,7 @@ fun downloadCommand(vararg args: String): List<String> {
 // 单个 URL 下载，支持断点续传与自动重试
 fun downloadFile(url: String, target: File, workDir: File, desc: String): Boolean {
     println("Downloading $desc: $url")
+    workDir.mkdirs()
     val cmd = downloadCommand(
         "-L", "--retry", "5", "--retry-delay", "3", "--retry-all-errors",
         "-C", "-", // 断点续传

@@ -21,6 +21,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Xime"
+rootProject.name = "Misaki"
 include(":app")
 include(":plugin-core")

@@ -70,6 +70,9 @@ set(Marisa_STATIC TRUE CACHE BOOL "" FORCE)
 set(LIBMARISA marisa)
 option(USE_SYSTEM_MARISA "" ON)
 
+# OpenCC 在 Android 交叉编译时仍需要宿主机 Python 生成词典数据。
+# 避免在 NDK sysroot 中查找，确保 macOS/Linux/Windows 构建机都能发现 Python。
+find_program(PYTHON_EXECUTABLE NAMES python3 python NO_CMAKE_FIND_ROOT_PATH REQUIRED)
 add_subdirectory(librime/deps/opencc)
 include(OpenccWorkarounds)
 

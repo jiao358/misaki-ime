@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/logo.jpg" alt="Xime Logo" width="600">
+  <img src="docs/logo.jpg" alt="Misaki Logo" width="600">
 </p>
 
-<h1 align="center">Xime（曦码） - 五笔/拼音输入法</h1>
+<h1 align="center">Misaki - 五笔/拼音输入法与关系沟通助手</h1>
 
 <p align="center">
   <a href="README.md">English</a> · <a href="README.zh-TW.md">繁體中文</a>
@@ -87,10 +87,10 @@
 
 ### 从 Release 下载
 
-1. 在 [Releases](https://github.com/ximeiorg/Xime/releases) 页面下载最新版本的 APK
+1. 在 [Releases](https://github.com/jiao358/misaki-ime/releases) 页面下载最新版本的 APK
 2. 安装应用
-3. 在系统设置中启用 Xime 输入法
-4. 将 Xime 设为当前输入法
+3. 在系统设置中启用 Misaki 输入法
+4. 将 Misaki 设为当前输入法
 
 ### 国内下载
 
@@ -100,8 +100,8 @@
 
 1. 克隆项目并构建 APK
 2. 安装应用
-3. 在系统设置中启用 Xime 输入法
-4. 将 Xime 设为当前输入法
+3. 在系统设置中启用 Misaki 输入法
+4. 将 Misaki 设为当前输入法
 
 ## 使用文档
 
@@ -111,7 +111,7 @@
 
 ```bash
 # 克隆项目（包含子模块）
-git clone --recursive https://github.com/ximeiorg/Xime.git
+git clone --recursive https://github.com/jiao358/misaki-ime.git
 
 # 或者在已克隆的项目中初始化子模块
 git submodule update --init --recursive
