@@ -324,8 +324,20 @@ fun KeyboardView(
                 },
                 currentPersonLabel = currentPerson?.alias,
                 onCurrentPersonClick = { viewModel.showOverlay(OverlayRoute.Relationships) },
-                onRememberClick = { viewModel.showOverlay(OverlayRoute.MemoryCapture) },
-                onSmartReplyClick = { viewModel.showOverlay(OverlayRoute.SmartReply) },
+                onRememberClick = {
+                    val clipboardText = com.kingzcheung.xime.clipboard.ClipboardManager
+                        .getInstance(context)
+                        .getCurrentClipboardText()
+                        .orEmpty()
+                    viewModel.showOverlay(OverlayRoute.MemoryCapture(clipboardText))
+                },
+                onSmartReplyClick = {
+                    val clipboardText = com.kingzcheung.xime.clipboard.ClipboardManager
+                        .getInstance(context)
+                        .getCurrentClipboardText()
+                        .orEmpty()
+                    viewModel.showOverlay(OverlayRoute.SmartReply(clipboardText))
+                },
                 visuals = CandidateBarVisuals(
                     backgroundColor = Color.Transparent,
                     textColor = candidateTextColor,
@@ -914,25 +926,28 @@ fun KeyboardView(
                         backgroundColor = keyboardBgColor,
                         textColor = keyTextColor,
                         accentColor = accentColor,
-                        onBack = { viewModel.closeOverlay() },
+                        onBack = {
+                            if (p.backStack.isEmpty()) viewModel.closeOverlay()
+                            else viewModel.popOverlay()
+                        },
                         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                     )
                     is OverlayRoute.MemoryCapture -> MemoryCaptureView(
-                        initialText = state.clipboardItems.firstOrNull()?.text.orEmpty(),
+                        initialText = p.route.initialText,
                         backgroundColor = keyboardBgColor,
                         textColor = keyTextColor,
                         accentColor = accentColor,
-                        onChoosePerson = { viewModel.showOverlay(OverlayRoute.Relationships) },
+                        onChoosePerson = { viewModel.pushOverlay(OverlayRoute.Relationships) },
                         onSaved = { viewModel.closeOverlay() },
                         onBack = { viewModel.closeOverlay() },
                         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                     )
                     is OverlayRoute.SmartReply -> SmartReplyView(
-                        initialMessage = state.clipboardItems.firstOrNull()?.text.orEmpty(),
+                        initialMessage = p.route.initialText,
                         backgroundColor = keyboardBgColor,
                         textColor = keyTextColor,
                         accentColor = accentColor,
-                        onChoosePerson = { viewModel.showOverlay(OverlayRoute.Relationships) },
+                        onChoosePerson = { viewModel.pushOverlay(OverlayRoute.Relationships) },
                         onInsert = { reply ->
                             callbacks.onCommitText?.invoke(reply)
                             viewModel.closeOverlay()

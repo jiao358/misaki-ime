@@ -32,8 +32,8 @@ sealed interface OverlayRoute {
     data class Clipboard(val tab: Int = 0) : OverlayRoute
     data object ToolbarCustomize : OverlayRoute
     data object Relationships : OverlayRoute
-    data object MemoryCapture : OverlayRoute
-    data object SmartReply : OverlayRoute
+    data class MemoryCapture(val initialText: String) : OverlayRoute
+    data class SmartReply(val initialText: String) : OverlayRoute
     data class SplitWords(val text: String) : OverlayRoute
     data object Symbol : OverlayRoute
     data object Emoji : OverlayRoute

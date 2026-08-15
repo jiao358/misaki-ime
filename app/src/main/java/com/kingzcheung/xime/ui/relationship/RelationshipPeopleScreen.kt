@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -39,9 +41,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +66,8 @@ import com.kingzcheung.xime.relationship.MemoryKind
 import com.kingzcheung.xime.relationship.RelationshipMemory
 import com.kingzcheung.xime.relationship.CommitmentRepository
 import com.kingzcheung.xime.relationship.CommitmentStatus
+import com.kingzcheung.xime.relationship.combineReminderDateTime
+import com.kingzcheung.xime.relationship.reminderDateAsUtcPickerMillis
 import com.kingzcheung.xime.relationship.db.CommitmentEntity
 import com.kingzcheung.xime.relationship.RelationshipDataExporter
 import com.kingzcheung.xime.relationship.db.PersonEntity
@@ -480,13 +488,20 @@ private fun CommitmentRow(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun CommitmentEditorDialog(
     initialTitle: String,
     onDismiss: () -> Unit,
     onSave: (String, Long) -> Unit,
 ) {
     var title by remember(initialTitle) { mutableStateOf(initialTitle.take(160)) }
-    var afterDays by remember { mutableStateOf(1) }
+    var dueAt by remember { mutableLongStateOf(System.currentTimeMillis() + CommitmentRepository.ONE_DAY_MS) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val formattedDueAt = remember(dueAt) {
+        DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm")
+            .format(Instant.ofEpochMilli(dueAt).atZone(ZoneId.systemDefault()))
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("创建关系提醒") },
@@ -501,17 +516,18 @@ private fun CommitmentEditorDialog(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(1 to "明天", 3 to "3天后", 7 to "7天后").forEach { (days, label) ->
-                        TextButton(onClick = { afterDays = days }) {
-                            Text(
-                                label,
-                                color = if (afterDays == days) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                            )
+                        TextButton(
+                            onClick = {
+                                dueAt = System.currentTimeMillis() + days * CommitmentRepository.ONE_DAY_MS
+                            },
+                        ) {
+                            Text(label)
                         }
                     }
+                }
+                Text("提醒时间：$formattedDueAt", style = MaterialTheme.typography.bodyMedium)
+                TextButton(onClick = { showDatePicker = true }) {
+                    Text("选择具体日期和时间")
                 }
             }
         },
@@ -519,15 +535,73 @@ private fun CommitmentEditorDialog(
             Button(
                 enabled = title.isNotBlank(),
                 onClick = {
-                    onSave(
-                        title,
-                        System.currentTimeMillis() + afterDays * CommitmentRepository.ONE_DAY_MS,
-                    )
+                    onSave(title, dueAt)
                 },
             ) { Text("创建") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
     )
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = reminderDateAsUtcPickerMillis(dueAt),
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedDate ->
+                            val currentTime = Instant.ofEpochMilli(dueAt).atZone(ZoneId.systemDefault())
+                            dueAt = combineReminderDateTime(
+                                selectedUtcDateMillis = selectedDate,
+                                hour = currentTime.hour,
+                                minute = currentTime.minute,
+                            )
+                            showDatePicker = false
+                            showTimePicker = true
+                        }
+                    },
+                ) { Text("下一步") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("取消") }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showTimePicker) {
+        val currentTime = remember(dueAt) {
+            Instant.ofEpochMilli(dueAt).atZone(ZoneId.systemDefault())
+        }
+        val timePickerState = rememberTimePickerState(
+            initialHour = currentTime.hour,
+            initialMinute = currentTime.minute,
+            is24Hour = true,
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("选择提醒时间") },
+            text = { TimePicker(state = timePickerState) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        dueAt = combineReminderDateTime(
+                            selectedUtcDateMillis = reminderDateAsUtcPickerMillis(dueAt),
+                            hour = timePickerState.hour,
+                            minute = timePickerState.minute,
+                        )
+                        showTimePicker = false
+                    },
+                ) { Text("确定") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("取消") }
+            },
+        )
+    }
 }
 
 @Composable
