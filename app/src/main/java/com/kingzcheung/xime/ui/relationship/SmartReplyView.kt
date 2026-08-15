@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -84,7 +85,8 @@ fun SmartReplyView(
         modifier = modifier
             .fillMaxSize()
             .background(backgroundColor)
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -101,36 +103,14 @@ fun SmartReplyView(
                     fontSize = 11.sp,
                 )
             }
-            if (currentPerson == null) {
-                Button(onClick = onChoosePerson) { Text("选择") }
-            }
-        }
-
-        OutlinedTextField(
-            value = message,
-            onValueChange = { message = it.take(2_000) },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("对方刚刚说") },
-            placeholder = { Text("先复制对方的一条消息") },
-            maxLines = 2,
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                "仅发送本条消息和 ${relevantMemories.size} 条相关记忆",
-                color = textColor.copy(alpha = 0.65f),
-                fontSize = 11.sp,
-            )
             Button(
-                enabled = person != null && message.isNotBlank() && !isLoading,
+                enabled = currentPerson == null || (message.isNotBlank() && !isLoading),
                 onClick = {
-                    val target = person ?: return@Button
+                    val target = person
+                    if (target == null) {
+                        onChoosePerson()
+                        return@Button
+                    }
                     isLoading = true
                     scope.launch {
                         val result = RelationshipAiClient.instance.generateReplies(
@@ -152,22 +132,43 @@ fun SmartReplyView(
                 },
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.padding(2.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                 } else {
-                    Text("生成 3 条")
+                    Text(if (currentPerson == null) "选择对象" else "生成 3 条")
                 }
             }
         }
+
+        OutlinedTextField(
+            value = message,
+            onValueChange = { message = it.take(2_000) },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("对方刚刚说") },
+            placeholder = { Text("先复制对方的一条消息") },
+            singleLine = true,
+        )
+
+        Text(
+            "${relevantMemories.size} 条相关记忆·仅用于本次生成",
+            color = textColor.copy(alpha = 0.65f),
+            fontSize = 10.sp,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
 
         if (isDegraded) {
             Text(
                 "网络服务暂不可用，当前展示本地安全建议。",
                 color = accentColor,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
             )
         }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             items(candidates, key = { it.candidateId }) { candidate ->
                 ReplyCandidateCard(
                     candidate = candidate,
@@ -209,20 +210,33 @@ private fun ReplyCandidateCard(
         else -> "自然真诚"
     }
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Text(styleLabel, color = accentColor, fontSize = 11.sp)
-            Text(candidate.text, color = textColor, fontSize = 14.sp)
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(styleLabel, color = accentColor, fontSize = 11.sp)
+                if (candidate.usedMemories.isNotEmpty()) {
+                    Text(
+                        "引用 ${candidate.usedMemories.size} 条记忆",
+                        color = textColor.copy(alpha = 0.55f),
+                        fontSize = 9.sp,
+                    )
+                }
+            }
+            Text(candidate.text, color = textColor, fontSize = 13.sp, maxLines = 3)
             if (candidate.usedMemories.isNotEmpty()) {
                 Text(
                     "参考：${candidate.usedMemories.joinToString("；")}",
                     color = textColor.copy(alpha = 0.55f),
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     maxLines = 1,
                 )
             }
             Row(modifier = Modifier.align(Alignment.End)) {
                 TextButton(onClick = onDislike) { Text("不合适") }
-                TextButton(onClick = onInsert) { Text("插入输入框") }
+                TextButton(onClick = onInsert) { Text("插入") }
             }
         }
     }
