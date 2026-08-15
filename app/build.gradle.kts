@@ -60,6 +60,10 @@ android {
         // 构建信息
         buildConfigField("String", "GIT_HASH", "\"${getGitHash()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
+        val relationshipApiBaseUrl = providers.gradleProperty("MISAKI_API_BASE_URL")
+            .orElse("http://10.0.2.2:8000")
+            .get()
+        buildConfigField("String", "RELATIONSHIP_API_BASE_URL", "\"$relationshipApiBaseUrl\"")
     }
 
     signingConfigs {

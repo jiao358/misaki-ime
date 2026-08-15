@@ -53,12 +53,16 @@ import com.kingzcheung.xime.keyboard.PanelType
 import com.kingzcheung.xime.keyboard.ToolbarAction
 import com.kingzcheung.xime.keyboard.ToolbarButton
 import com.kingzcheung.xime.rime.T9InputController
+import com.kingzcheung.xime.relationship.CurrentPersonStore
 import com.kingzcheung.xime.service.CandidateState
 import com.kingzcheung.xime.settings.KeysConfigHelper
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.ui.menubar.ClipboardView
 import com.kingzcheung.xime.ui.menubar.SchemaListView
 import com.kingzcheung.xime.ui.menubar.ToolbarCustomizeView
+import com.kingzcheung.xime.ui.relationship.RelationshipPickerView
+import com.kingzcheung.xime.ui.relationship.MemoryCaptureView
+import com.kingzcheung.xime.ui.relationship.SmartReplyView
 import com.kingzcheung.xime.ui.theme.KeyboardThemes
 import com.kingzcheung.xime.ui.theme.keyboardBackground
 import com.kingzcheung.xime.util.PermissionHelper
@@ -86,6 +90,11 @@ fun KeyboardView(
     val keyboardState by viewModel.keyboardState.collectAsStateWithLifecycle()
     val page by viewModel.page.collectAsStateWithLifecycle()
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val currentPersonFlow = remember(context) { CurrentPersonStore.observe(context) }
+    val currentPerson by currentPersonFlow.collectAsStateWithLifecycle(
+        initialValue = CurrentPersonStore.current(context),
+    )
     val isLandscape = if (state.isFloatingMode) false
         else LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -313,6 +322,10 @@ fun KeyboardView(
                     }
                     ToolbarAction(button, onClick)
                 },
+                currentPersonLabel = currentPerson?.alias,
+                onCurrentPersonClick = { viewModel.showOverlay(OverlayRoute.Relationships) },
+                onRememberClick = { viewModel.showOverlay(OverlayRoute.MemoryCapture) },
+                onSmartReplyClick = { viewModel.showOverlay(OverlayRoute.SmartReply) },
                 visuals = CandidateBarVisuals(
                     backgroundColor = Color.Transparent,
                     textColor = candidateTextColor,
@@ -897,6 +910,36 @@ fun KeyboardView(
                         bottomPaddingDp = state.keyboardBottomPaddingDp,
                         modifier = Modifier.fillMaxWidth().fillMaxHeight()
                     )
+                    is OverlayRoute.Relationships -> RelationshipPickerView(
+                        backgroundColor = keyboardBgColor,
+                        textColor = keyTextColor,
+                        accentColor = accentColor,
+                        onBack = { viewModel.closeOverlay() },
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                    )
+                    is OverlayRoute.MemoryCapture -> MemoryCaptureView(
+                        initialText = state.clipboardItems.firstOrNull()?.text.orEmpty(),
+                        backgroundColor = keyboardBgColor,
+                        textColor = keyTextColor,
+                        accentColor = accentColor,
+                        onChoosePerson = { viewModel.showOverlay(OverlayRoute.Relationships) },
+                        onSaved = { viewModel.closeOverlay() },
+                        onBack = { viewModel.closeOverlay() },
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                    )
+                    is OverlayRoute.SmartReply -> SmartReplyView(
+                        initialMessage = state.clipboardItems.firstOrNull()?.text.orEmpty(),
+                        backgroundColor = keyboardBgColor,
+                        textColor = keyTextColor,
+                        accentColor = accentColor,
+                        onChoosePerson = { viewModel.showOverlay(OverlayRoute.Relationships) },
+                        onInsert = { reply ->
+                            callbacks.onCommitText?.invoke(reply)
+                            viewModel.closeOverlay()
+                        },
+                        onBack = { viewModel.closeOverlay() },
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                    )
                     is OverlayRoute.Edit -> {
                         val editAction: (String) -> Unit = { action ->
                             when (action) {
@@ -993,5 +1036,3 @@ fun KeyboardView(
     }
     }
 }
-
-

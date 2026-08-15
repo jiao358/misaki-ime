@@ -29,6 +29,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -87,6 +90,10 @@ fun CandidateBar(
     state: CandidateBarState,
     page: KeyboardPage = KeyboardPage.Main(com.kingzcheung.xime.keyboard.MainType.FULL),
     toolbarActions: List<ToolbarAction> = emptyList(),
+    currentPersonLabel: String? = null,
+    onCurrentPersonClick: (() -> Unit)? = null,
+    onRememberClick: (() -> Unit)? = null,
+    onSmartReplyClick: (() -> Unit)? = null,
     visuals: CandidateBarVisuals,
     callbacks: CandidateBarCallbacks,
     inlineSuggestions: List<*> = listOf<Any>(),
@@ -454,7 +461,71 @@ fun CandidateBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End,
                     ) {
-                        if (toolbarActions.isNotEmpty()) {
+                        if (toolbarActions.isNotEmpty() || onCurrentPersonClick != null || onRememberClick != null || onSmartReplyClick != null) {
+                            if (onCurrentPersonClick != null) {
+                                Row(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(iconButtonContainer)
+                                        .clickable(onClick = onCurrentPersonClick)
+                                        .padding(horizontal = 9.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "当前沟通对象",
+                                        tint = visuals.accentColor,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = currentPersonLabel ?: "选择对象",
+                                        color = iconButtonTint,
+                                        fontSize = 11.sp,
+                                        maxLines = 1,
+                                    )
+                                }
+                            }
+                            if (onRememberClick != null) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(start = 6.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(iconButtonContainer)
+                                        .clickable(onClick = onRememberClick)
+                                        .padding(horizontal = 9.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.BookmarkAdd,
+                                        contentDescription = "记一下",
+                                        tint = visuals.accentColor,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("记一下", color = iconButtonTint, fontSize = 11.sp, maxLines = 1)
+                                }
+                            }
+                            if (onSmartReplyClick != null) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(start = 6.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(iconButtonContainer)
+                                        .clickable(onClick = onSmartReplyClick)
+                                        .padding(horizontal = 9.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = "妙回",
+                                        tint = visuals.accentColor,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("妙回", color = iconButtonTint, fontSize = 11.sp, maxLines = 1)
+                                }
+                            }
                             toolbarActions.forEach { action ->
                                 val interactionSource = remember { MutableInteractionSource() }
                                 val isPressed by interactionSource.collectIsPressedAsState()

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kingzcheung.xime.ui.relationship.RelationshipPeopleScreen
 
 @Composable
 fun SettingsScreen(
@@ -37,8 +38,12 @@ fun SettingsScreen(
                 onNavigateToSpeechToText = { navController.navigate(SettingsRoutes.SpeechToText) },
                 onNavigateToAbout = { navController.navigate(SettingsRoutes.About) },
                 onNavigateToWebDav = { navController.navigate(SettingsRoutes.WebDav) },
-                onNavigateToClipboardSync = { navController.navigate(SettingsRoutes.ClipboardSync) }
+                onNavigateToClipboardSync = { navController.navigate(SettingsRoutes.ClipboardSync) },
+                onNavigateToRelationships = { navController.navigate(SettingsRoutes.Relationships) },
             )
+        }
+        composable(SettingsRoutes.Relationships) {
+            RelationshipPeopleScreen(onBack = { navController.popBackStack() })
         }
         composable(SettingsRoutes.Schema) {
             SchemaSettingsContent(

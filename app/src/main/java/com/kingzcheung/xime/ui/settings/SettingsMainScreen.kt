@@ -32,6 +32,7 @@ import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Keyboard
 import androidx.compose.material.icons.twotone.KeyboardAlt
 import androidx.compose.material.icons.twotone.Palette
+import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.Storefront
 import androidx.compose.material.icons.twotone.Straighten
 import androidx.compose.material.icons.twotone.Sync
@@ -80,7 +81,8 @@ fun SettingsMainContent(
     onNavigateToSpeechToText: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToWebDav: () -> Unit = {},
-    onNavigateToClipboardSync: () -> Unit = {}
+    onNavigateToClipboardSync: () -> Unit = {},
+    onNavigateToRelationships: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -112,6 +114,18 @@ fun SettingsMainContent(
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item {
+                SettingsSection(title = "关系助手", content = {
+                    SettingsItem(
+                        icon = Icons.TwoTone.People,
+                        title = "关系对象",
+                        subtitle = "管理昵称、关系阶段与当前沟通对象",
+                        onClick = onNavigateToRelationships,
+                        showArrow = true,
+                    )
+                })
+            }
+
             item {
                 SettingsSection(title = "输入法", content = {
                     SettingsItem(

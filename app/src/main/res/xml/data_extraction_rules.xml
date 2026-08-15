@@ -5,15 +5,17 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="database" path="relationship.db" />
+        <exclude domain="sharedpref" path="relationship_session.xml" />
+        <exclude domain="sharedpref" path="relationship_reply_preferences.xml" />
         <!-- TODO: Use <include> and <exclude> to control what is backed up.
         <include .../>
         <exclude .../>
         -->
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="database" path="relationship.db" />
+        <exclude domain="sharedpref" path="relationship_session.xml" />
+        <exclude domain="sharedpref" path="relationship_reply_preferences.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>
